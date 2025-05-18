@@ -1,0 +1,8 @@
+Actinobacteriota	Actinomycetota
+Bdellovibrionota_A	Bdellovibrionota
+Bdellovibrionota_B	Bdellovibrionota
+Chloroflexota_A	Chloroflexota
+Cyanobacteria	Cyanobacteriota
+Myxococcota_A	Myxococcota
+Proteobacteria	Pseudomonadota
+Eremiobacterota	Vulcanimicrobiota

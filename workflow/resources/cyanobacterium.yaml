@@ -1,0 +1,33 @@
+topology: 'linear'
+consortium: 'SkyNet consortium'
+sra:
+ - accession: 'ERR2193926'
+tp_assembly: true
+organism:
+   genus_species: 'Pseudanabaena sp.' 
+contact_info:
+    first_name: 'John'
+    last_name: 'Doe'
+    email: 'john_doe@example.com'
+    organization: 'Institute of Klebsiella foobarensis research'
+    department: 'Department of Using NCBI'
+    phone: '333-333-3333'
+    street: '1234 Main St'
+    city: 'Docker'
+    postal_code: '12345'
+    country: 'Lappland'
+authors:
+    - author:
+        first_name: 'John'
+        last_name: 'Doe'
+bioproject: 'PRJNA37911'
+biosample: 'SAMN02436260'      
+publications:
+    - publication:
+        pmid: 16397293
+        title: 'Discrete CHARMm of Klebsiella foobarensis. Journal of Improbable Results, vol. 34, issue 13, pages: 10001-100005, 2018'
+        status: published  # this is enum: controlled vocabulary
+        authors:
+            - author:
+                first_name: 'John'
+                last_name: 'Doe'

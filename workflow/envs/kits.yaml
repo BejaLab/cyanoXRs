@@ -1,0 +1,6 @@
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - seqkit=2.8.0
+ - csvkit=1.5.0
