@@ -4,38 +4,34 @@ library(dplyr)
 library(tidyr)
 library(treeio)
 library(ggtree)
-library(readxl)
-library(ggstar)
 library(ggplot2)
-library(ggnewscale)
+library(readxl)
 library(castor)
 library(ape)
-library(tools)
 library(tibble)
-library(ggtreeExtra)
-library(tools)
-library(adephylo)
-library(tools)
-library(readxl)
-library(ggnewscale)
 
 with(snakemake@input, {
     tree_file <<- tree
     metadata_file <<- metadata
+    refs_file <<- refs
 })
-output_file <- unlist(snakemake@output)
-with(snakemake@params, {
-    root_by <<- root_by
+with(snakemake@output, {
+    image_file <<- image
+    jtree_file <<- jtree
 })
 
-# tree_file <- "analysis/RAxML_bipartitions.txt"
-# metadata_file <- "input/metadata.xlsx"
-# output_file <- "tmp.pdf"
+with(snakemake@params, {
+    ingroup <<- ingroup
+})
 
 to_treedata <- function(tree) {
     class(tree) <- c("tbl_tree", "tbl_df", "tbl", "data.frame")
     as.treedata(tree)
 }
+
+refs <- names(read.fasta(refs_file)) %>%
+    sub(" .+", "", .)
+outgroups <- refs[! refs %in% ingroup]
 
 metadata <- read_excel(metadata_file) %>%
     group_by(scaffold) %>%
@@ -44,7 +40,8 @@ metadata <- read_excel(metadata_file) %>%
     extract(taxonomy, into = c("Family"), regex = "(o__[^;]+;f__[^;]*)")
 
 tree <- read.tree(tree_file) %>%
-    root(root_by[root_by %in% .$tip.label], edgelabel = T, resolve.root = T) %>%
+    root(outgroups[outgroups %in% .$tip.label], edgelabel = T, resolve.root = T) %>%
+    drop.tip(outgroups) %>%
     as_tibble %>%
     mutate(is.tip = ! node %in% parent & node != parent) %>%
     mutate(Support = ifelse(is.tip, NA, as.numeric(label))) %>%
@@ -55,7 +52,8 @@ tree <- read.tree(tree_file) %>%
         type == "MAG" & !is.na(Family) ~ assembly,
         is.tip & grepl("[^0-9]", label) ~ label,
         F ~ NA)
-    )
+    ) %>%
+    to_treedata
 
 shapes <- c(
     freshwater = 24, # triangle up
@@ -63,15 +61,21 @@ shapes <- c(
     terrestrial = 22, # square
     saline = 23 # diamond
 )
+colors <- c(
+    cold = "#55ddff",
+    hot = "#ff5555",
+    moderate = "#2aff80"
+)
 
 gap <- 0.03
-p <- ggtree(to_treedata(tree), aes(color = Family), size = 0.1, layout = "rectangular", open.angle = 15) +
+p <- ggtree(tree, aes(color = Family), size = 0.1, layout = "rectangular", open.angle = 15) +
     geom_tiplab(aes(label = Label.show), size = 2, align = F) +
     geom_text2(aes(subset = Support > 60, x = branch, label = Support), color = "black", size = 2, vjust = -0.5) +
     geom_tippoint(aes(subset = !is.na(habitat1), shape = habitat1, fill = habitat3, x = x + gap * 1), color = "transparent") +
     # geom_tippoint(aes(subset = !is.na(habitat3), color = habitat3, x = x + gap * 2), shape = "circle") +
     scale_shape_manual(values = shapes, na.value = 21) +
-    geom_treescale(width = 0.5)
+    scale_fill_manual(values = colors) +
+    geom_treescale(width = 0.1)
 
-ggsave(output_file, p, width = 12, height = 10)
-
+write.jtree(tree, jtree_file)
+ggsave(image_file, p, width = 9, height = 7)

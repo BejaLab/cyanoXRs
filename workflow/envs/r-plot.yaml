@@ -1,0 +1,19 @@
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - r-base=4.4.3
+ - r-tidyr=1.3.1
+ - r-dplyr=1.1.4
+ - r-ggplot2=3.5.2
+ - r-readxl=1.4.5
+ - bioconductor-treeio=1.30.0
+ - bioconductor-ggtree=3.14.0
+ - r-ape=5.8_1
+ - r-phytools=2.4_4
+ - r-phangorn=2.11.1
+ - r-rvcheck=0.2.1
+ - bioconductor-biostrings=2.74.0
+ - r-svglite
+ - r-castor=1.8.3
+ - r-polychrome=1.5.1

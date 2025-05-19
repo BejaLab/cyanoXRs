@@ -84,17 +84,20 @@ rule raxml:
     shell:
         "raxmlHPC-PTHREADS-SSE3 -f a -p {params.seed} -x {params.seed} -# {params.bootstrap} -m {params.model} -T {threads} -s {input} -n txt -w $(dirname $(realpath {output}))"
 
-rule plot_tree:
+rule plot_small_tree:
     input:
         tree = "analysis/RAxML_bipartitions.txt",
         metadata = "input/metadata.xlsx",
-
+        refs = "input/ingroup.fasta"
     output:
-        "analysis/RAxML.svg"
+        image = "output/small_tree.svg",
+        jtree = "output/small_tree.jtree"
     params:
-        root_by = [ "KIE48989.1", "KGA12121.1" ]
+        ingroup = [ "GR" ]
+    conda:
+        "envs/r-plot.yaml"
     script:
-        "scripts/plot_tree.R"
+        "scripts/plot_small_tree.R"
 
 rule gtdbtk:
     input:
@@ -335,7 +338,22 @@ rule gene_iqtree:
     conda:
         "envs/iqtree.yaml"
     shell:
-        "iqtree2 -s {input} --prefix {params.prefix} -redo --alrt 1000 -B {params.B} --seed {params.seed} -T {threads}"
+        "iqtree2 -s {input} --prefix {params.prefix} -redo --alrt 1000 -B {params.B} --seed {params.seed} -T {threads} -msub nuclear"
+
+rule plot_big_tree:
+    input:
+        scaffolds = "analysis/tblastn/scaffold_headers.txt",
+        tree = "analysis/proteins/big_cdhit.treefile",
+        synonyms = "workflow/resources/phyla_synonyms.txt",
+        ref_taxonomy = "input/ingroup_taxonomy.txt",
+        outgroups = "input/outgroups.fasta"
+    output:
+        image = "output/big_tree.svg",
+        jtree = "output/big_tree.jtree"
+    conda:
+        "envs/r-plot.yaml"
+    script:
+        "scripts/plot_big_tree.R"
 
 rule tblastn_gene:
     input:
