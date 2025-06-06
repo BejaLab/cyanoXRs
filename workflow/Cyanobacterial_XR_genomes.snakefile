@@ -73,7 +73,7 @@ rule blastp_fasta:
         matches = expand("analysis/blastp/{{gene}}/{genome}.txt", genome = genomes),
         fasta = expand("analysis/genomes/{genome}.faa", genome = genomes)
     output:
-        "analysis/blastp/{gene}.fasta"
+        "output/{gene}_homologs.fasta"
     params:
         e = 1e-10
     conda:

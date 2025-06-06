@@ -3,7 +3,7 @@ datasets ,= glob_wildcards("input/{dataset}.fasta")
 genomes ,= glob_wildcards("genomes/{genome}.fna")
 
 genes = {
-    'nifH': [ "reviewed:true", "xref:interpro-IPR005977", "taxonomy_id:1117" ],
+    # 'nifH': [ "reviewed:true", "xref:interpro-IPR005977", "taxonomy_id:1117" ],
     'GvTcR': [ "accession:Q7NKP0" ]
 }
 
@@ -20,6 +20,7 @@ rule all:
     input:
         "output/Cyanobacterial_XR_clade.svg",
         "output/All_prokaryotic_XRs.svg",
+        expand("output/{gene}_homologs.faa", gene = genes),
         expand("output/Rhodopsins_in_cyanobacteria_{database}-{base}.svg", zip, database = databases, base = bases)
 
 # Make blast database for a protein fasta
