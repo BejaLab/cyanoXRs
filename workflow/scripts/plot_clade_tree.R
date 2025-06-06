@@ -35,6 +35,7 @@ outgroups <- refs[! refs %in% ingroup]
 
 metadata <- read_excel(metadata_file) %>%
     group_by(scaffold) %>%
+    rename(taxonomy = `GTDBtk taxonomy`, label = `sequence #`) %>%
     fill(taxonomy, .direction = "updown") %>%
     fill(assembly, .direction = "updown") %>%
     extract(taxonomy, into = c("Family"), regex = "(o__[^;]+;f__[^;]*)")

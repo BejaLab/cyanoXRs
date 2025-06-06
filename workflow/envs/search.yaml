@@ -3,3 +3,5 @@ channels:
  - bioconda
 dependencies:
  - blast=2.16.0
+ - emboss=6.6.0
+ - hmmer=3.4

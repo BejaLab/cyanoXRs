@@ -34,7 +34,7 @@ outgroups <- names(read.fasta(outgroups_file)) %>%
 synonyms <- read.table(synonyms_file, col.names = c("from", "to")) %>%
     with(setNames(to, from))
 scaffolds <- data.frame(line = readLines(scaffolds_file)) %>%
-    separate(line, into = c("scaffold", "scaf_description"), sep = " ", extra = "merge") %>%
+    separate(line, into = c("scaffold", "taxonomy"), sep = " ", extra = "merge") %>%
     mutate(scaffold = sub(":", "_", scaffold))
 refs <- read.table(ref_taxonomy_file, col.names = c("label", "ref_taxonomy"))
 
@@ -48,10 +48,10 @@ tree <- read.tree(tree_file) %>%
     drop.tip(outgroups) %>%
     as_tibble %>%
     mutate(is.tip = ! node %in% parent) %>%
-    mutate(scaffold = sub("_\\d+$", "", label)) %>%
+    mutate(scaffold = ifelse(is.tip, sub("_\\d+$", "", label), NA)) %>%
     left_join(scaffolds, by = "scaffold") %>%
     left_join(refs, by = "label") %>%
-    mutate(description = paste(scaf_description, ref_taxonomy)) %>%
+    mutate(description = paste(taxonomy, ref_taxonomy)) %>%
     extract_tax("description", "domain", "d") %>%
     extract_tax("description", "phylum", "p") %>%
     mutate(phylum = recode(phylum, !!!synonyms)) %>%
@@ -62,6 +62,7 @@ tree <- read.tree(tree_file) %>%
     separate(label, into = c("SH_aLRT", "UFboot"), sep = "/", fill = "left", remove = F) %>%
     mutate(UFboot = ifelse(is.tip | UFboot == "", NA, UFboot)) %>%
     mutate(UFboot = as.numeric(UFboot)) %>%
+    select(-is.tip, -description) %>%
     to_treedata
 
 n_taxa <- filter(tree@data, !is.na(taxon)) %>%
