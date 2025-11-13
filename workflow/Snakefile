@@ -3,7 +3,6 @@ datasets ,= glob_wildcards("input/{dataset}.fasta")
 genomes ,= glob_wildcards("genomes/{genome}.fna")
 
 genes = {
-    # 'nifH': [ "reviewed:true", "xref:interpro-IPR005977", "taxonomy_id:1117" ],
     'GvTcR': [ "accession:Q7NKP0" ],
     'Diox1': [ "accession:P74334 OR accession:Q8YPB4" ],
 }
