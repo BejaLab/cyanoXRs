@@ -5,7 +5,7 @@ rule gtdbtk:
     output:
         directory("analysis/gtdbtk")
     params:
-        data_path = "/data/gtdbtk/release214.1/auxillary_files/gtdbtk_r214_data/release214"
+        data_path = "/data/gtdbtk/release214/214.1/auxillary_files/gtdbtk_r214_data/release214"
     conda:
         "envs/gtdbtk.yaml"
     shell:

@@ -6,11 +6,12 @@ rule cat_sequences:
     output:
         "analysis/cyanobacteria/sequences.fasta"
     params:
-        m = 220
+        m = 240,
+        x = lambda w: 'X{10}'
     conda:
         "envs/kits.yaml"
     shell:
-        "seqkit seq -m {params.m} -o {output} {input}"
+        "seqkit seq -gim {params.m} {input} | seqkit grep -vdsp '{params.x}' | tr : _ > {output}"
 
 # Cluster identical sequences
 rule cdhit:
@@ -55,7 +56,9 @@ rule raxml:
     output:
         "analysis/cyanobacteria/RAxML_info.txt",
         "analysis/cyanobacteria/RAxML_bipartitions.txt",
-        "analysis/cyanobacteria/RAxML_bestTree.txt"
+        "analysis/cyanobacteria/RAxML_bestTree.txt",
+        "analysis/cyanobacteria/RAxML_bipartitionsBranchLabels.txt",
+        "analysis/cyanobacteria/RAxML_bootstrap.txt"
     params:
         model = "PROTGAMMAAUTO",
         seed = 123,

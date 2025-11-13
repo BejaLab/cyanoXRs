@@ -68,7 +68,8 @@ orders_p <- ggplot(map = aes(fill = order_label)) +
     geom_bar(stat = 'count', position = 'fill') +
     scale_y_continuous(labels = percent_format()) +
     scale_fill_manual(values = colors) +
-    ylab('Orders')
-p <- upset(presence, clades, annotations = list(Orders = orders_p))
+    ylab('Orders') +
+    guides(fill = guide_legend(ncol = 1))
+p <- upset(presence, clades, annotations = list(Orders = orders_p), set_sizes = (upset_set_size() + geom_text(aes(label = ..count..), stat = 'count', hjust = -0.1)))
 
-ggsave(plot_file, p)
+ggsave(plot_file, p, height = 7, width = 8.2)

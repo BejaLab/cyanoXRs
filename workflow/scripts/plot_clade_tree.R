@@ -34,11 +34,9 @@ refs <- names(read.fasta(refs_file)) %>%
 outgroups <- refs[! refs %in% ingroup]
 
 metadata <- read_excel(metadata_file) %>%
-    group_by(scaffold) %>%
-    rename(taxonomy = `GTDBtk taxonomy`, label = `sequence #`) %>%
-    fill(taxonomy, .direction = "updown") %>%
-    fill(assembly, .direction = "updown") %>%
-    extract(taxonomy, into = c("Family"), regex = "(o__[^;]+;f__[^;]*)")
+    rename(taxonomy = `GTDBtk taxonomy`) %>%
+    extract(taxonomy, into = c("Family", "Genus"), regex = "(o__[^;]+;f__[^;]*);(g__[^;]*)") %>%
+    mutate(label_cleaned = sub(":", "_", label))
 
 tree <- read.tree(tree_file) %>%
     root(outgroups[outgroups %in% .$tip.label], edgelabel = T, resolve.root = T) %>%
@@ -46,12 +44,12 @@ tree <- read.tree(tree_file) %>%
     as_tibble %>%
     mutate(is.tip = ! node %in% parent & node != parent) %>%
     mutate(Support = ifelse(is.tip, NA, as.numeric(label))) %>%
-    left_join(metadata, by = "label") %>%
+    rename(label_cleaned = label) %>%
+    left_join(metadata, by = "label_cleaned") %>%
     mutate(Label.show = case_when(
-        !is.na(alias) ~ alias,
         type == "isolate" ~ strain,
+        type == "MAG" & !is.na(Genus) & Genus != "g__" ~ sprintf("%s (%s)", assembly, Genus),
         type == "MAG" & !is.na(Family) ~ assembly,
-        is.tip & grepl("[^0-9]", label) ~ label,
         F ~ NA)
     ) %>%
     to_treedata
@@ -72,11 +70,10 @@ gap <- 0.03
 p <- ggtree(tree, aes(color = Family), size = 0.1, layout = "rectangular", open.angle = 15) +
     geom_tiplab(aes(label = Label.show), size = 2, align = F) +
     geom_text2(aes(subset = Support > 60, x = branch, label = Support), color = "black", size = 2, vjust = -0.5) +
-    geom_tippoint(aes(subset = !is.na(habitat1), shape = habitat1, fill = habitat3, x = x + gap * 1), color = "transparent") +
-    # geom_tippoint(aes(subset = !is.na(habitat3), color = habitat3, x = x + gap * 2), shape = "circle") +
+    geom_tippoint(aes(subset = !is.na(habitat1), shape = habitat1, fill = habitat2, x = x + gap * 1), color = "transparent") +
     scale_shape_manual(values = shapes, na.value = 21) +
     scale_fill_manual(values = colors) +
     geom_treescale(width = 0.1)
 
 write.jtree(tree, jtree_file)
-ggsave(image_file, p, width = 9, height = 7)
+ggsave(image_file, p, width = 9, height = 7.5)

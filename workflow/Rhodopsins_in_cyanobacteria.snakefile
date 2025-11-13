@@ -1,3 +1,5 @@
+taxon = 'c__Cyanobacteriia'
+
 # Create list of cyanobacterial scaffolds in a database
 rule taxon_contigs:
     input:
@@ -6,7 +8,7 @@ rule taxon_contigs:
         "analysis/cyano_genomes/{database}/{base}.txt"
     params:
         db = lambda w, input: os.path.splitext(input.ndb)[0],
-        taxa = 'c__Cyanobacteriia;'
+        taxa = f"{taxon};"
     conda:
         "envs/search.yaml"
     shell:
@@ -105,3 +107,50 @@ rule plot_families:
         "envs/r-upset.yaml"
     script:
         "scripts/plot_families.R"
+
+# Download reference trees
+rule dload_tree:
+    output:
+        "analysis/cyano_genomes/{database}/gtdb.tree"
+    params:
+        url = lambda w: trees[w.database]
+    shell:
+        "wget -qO {output} {params.url}"
+
+rule dload_taxonomy:
+    output:
+        "analysis/cyano_genomes/{database}/gtdb_cyanobacteria.tsv"
+    params:
+        url = lambda w: taxonomies[w.database],
+        taxon = taxon
+    shell:
+        "wget -qO- {params.url} | grep '{params.taxon}' > {output}"
+
+rule extract_cyanobacteria:
+    input:
+        "analysis/cyano_genomes/{database}/gtdb.tree"
+    output:
+        "analysis/cyano_genomes/{database}/gtdb_cyanobacteria.tree"
+    params:
+        taxon = taxon
+    conda:
+        "envs/newick_utils.yaml"
+    shell:
+        """
+        label=$(nw_labels {input} | grep -m1 '{params.taxon}' || true)
+        nw_clade {input} "$label" > {output}
+        """
+
+# Plot the distribution of the rhodopsins on the tree of cyanobacteria:
+rule plot_cyano_tree:
+    input:
+        genomes = "output/Rhodopsins_in_cyanobacteria_{database}-{base}.csv",
+        taxonomy = "analysis/cyano_genomes/{database}/gtdb_cyanobacteria.tsv",
+        tree = "analysis/cyano_genomes/{database}/gtdb_cyanobacteria.tree",
+        colors = "analysis/cyano_genomes/order.csv"
+    output:
+        "output/Rhodopsins_in_cyanobacteria_{database}-{base}-tree.svg"
+    conda:
+        "envs/r-plot.yaml"
+    script:
+        "scripts/plot_cyano_tree.R"

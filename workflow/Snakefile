@@ -4,12 +4,23 @@ genomes ,= glob_wildcards("genomes/{genome}.fna")
 
 genes = {
     # 'nifH': [ "reviewed:true", "xref:interpro-IPR005977", "taxonomy_id:1117" ],
-    'GvTcR': [ "accession:Q7NKP0" ]
+    'GvTcR': [ "accession:Q7NKP0" ],
+    'Diox1': [ "accession:P74334 OR accession:Q8YPB4" ],
 }
 
 databases, bases ,= glob_wildcards("databases/{database}/{base}.fna.ndb")
 
+trees = {
+    'GTDB': 'https://data.gtdb.ecogenomic.org/releases/release214/214.1/bac120_r214.tree',
+    'GEM': 'https://data.gtdb.ecogenomic.org/releases/release89/89.0/bac120_r89.tree'
+}
+taxonomies = {
+    'GTDB': 'https://data.gtdb.ecogenomic.org/releases/release214/214.1/bac120_taxonomy_r214.tsv',
+    'GEM': 'https://data.gtdb.ecogenomic.org/releases/release89/89.0/bac120_taxonomy_r89.tsv'
+}
+
 profile = 'PF01036'
+profiles = [ 'PF03055', 'PF15461', 'PF00502' ]
 
 include: "Cyanobacterial_clade.snakefile"
 include: "Cyanobacterial_XR_genomes.snakefile"
@@ -20,7 +31,8 @@ rule all:
     input:
         "output/Cyanobacterial_XR_clade.svg",
         "output/All_prokaryotic_XRs.svg",
-        expand("output/{gene}_homologs.faa", gene = genes),
+        expand("output/{gene}_homologs.fasta", gene = genes),
+        expand(expand("analysis/hmmsearch/{database}/{base}_{{profile}}.txt", zip, database = databases, base = bases), profile = profiles),
         expand("output/Rhodopsins_in_cyanobacteria_{database}-{base}.svg", zip, database = databases, base = bases)
 
 # Make blast database for a protein fasta

@@ -26,3 +26,4 @@ FcR1	d__Eukaryota;
 Pyro-XR	d__Eukaryota;
 AAP5-XR	d__Bacteria;p__Pseudomonadota;
 ABL3	d__Bacteria;p__Pseudomonadota;
+XR34	d__Bacteria;p__Pseudomonadota;
